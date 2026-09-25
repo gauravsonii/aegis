@@ -1,0 +1,22 @@
+{
+  "name": "blind-market",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:backend && npm run test:js",
+    "test:backend": "cargo test --manifest-path contracts/ultrahonk_soroban_verifier/Cargo.toml && cargo test --manifest-path contracts/ultrahonk_verifier/Cargo.toml && CARGO_BUILD_JOBS=1 cargo test --manifest-path contracts/blind_market/Cargo.toml",
+    "test:js": "node --test test/*.js",
+    "check:circuits": "nargo compile --program-dir circuits/commit && nargo compile --program-dir circuits/claim && nargo compile --program-dir circuits/tally_update && nargo compile --program-dir circuits/tally_finalize && nargo compile --program-dir circuits/reputation",
+    "build:contract": "cargo build --manifest-path contracts/blind_market/Cargo.toml --target wasm32v1-none --release",
+    "generate:proof-fixtures": "node scripts/generate-proof-fixtures.js",
+    "smoke:mpc-e2e": "node scripts/smoke-mpc-e2e-dynamic.mjs"
+  },
+  "dependencies": {
+    "@aztec/bb.js": "^0.87.0",
+    "@aztec/foundation": "^0.87.0",
+    "@noir-lang/noir_js": "^1.0.0-beta.9",
+    "@stellar/stellar-sdk": "^16.0.1",
+    "dotenv": "^16.4.7"
+  }
+}
