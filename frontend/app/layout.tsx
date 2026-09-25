@@ -28,7 +28,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const browserConfig = JSON.stringify(getAppConfig()).replace(/</g, "\\u003c");
+  const appConfig = getAppConfig({
+    allowMissing: process.env.NEXT_PHASE === "phase-production-build",
+  });
+  const browserConfig = JSON.stringify(appConfig ?? {}).replace(/</g, "\\u003c");
 
   return (
     <html lang="en">

@@ -2,10 +2,13 @@ import { Keypair } from "@stellar/stellar-sdk";
 import dotenv from "dotenv";
 import { resolve } from "node:path";
 
-dotenv.config({
-  path: resolve(process.cwd(), "..", ".env"),
-  override: true,
-});
+for (const envPath of [
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), "..", ".env"),
+  resolve(process.cwd(), "frontend", ".env"),
+]) {
+  dotenv.config({ path: envPath, override: false });
+}
 
 export type WalletConfig = {
   label: string;
@@ -51,7 +54,7 @@ function wallet(label: string, secret: string | undefined): WalletConfig | null 
   };
 }
 
-export function getAppConfig(): AppConfig {
+export function getAppConfig(options: { allowMissing?: boolean } = {}): AppConfig | null {
   const wallets = [
     wallet("admin", process.env.ADMIN_SECRET_KEY),
     wallet("user2", process.env.USER2_SECRET_KEY),
@@ -59,7 +62,23 @@ export function getAppConfig(): AppConfig {
   ].filter((entry): entry is WalletConfig => Boolean(entry));
 
   if (wallets.length === 0) {
+    if (options.allowMissing) {
+      return null;
+    }
     throw new Error("no demo wallets found in .env");
+  }
+
+  const requiredEnvNames = [
+    "STELLAR_RPC",
+    "STELLAR_NETWORK",
+    "MARKET_CONTRACT_ID",
+    "REFLECTOR_ID",
+    "USDC_TOKEN_ID",
+    "COMMIT_VERIFIER_ID",
+    "CLAIM_VERIFIER_ID",
+  ];
+  if (options.allowMissing && requiredEnvNames.some((name) => !process.env[name])) {
+    return null;
   }
 
   return {
